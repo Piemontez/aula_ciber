@@ -1,4 +1,4 @@
-name: CI - Pipeline Completa # Nome ajustado para refletir o trabalho
+name: CI - Pipeline Completa 
 run-name: CI build (${{ inputs.tipo_versao }}) disparada por ${{ github.actor }}
 
 on:
@@ -70,7 +70,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Ou a versão que seu projeto usa
+          node-version: '18' 
       - name: Instalar dependências e Buildar Backend
         shell: bash
         run: |
@@ -98,11 +98,11 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Ou a versão que seu projeto usa
+          node-version: '18' 
       - name: Executar testes automatizados (Backend)
         shell: bash
         run: |
-          cd ci_cd_projeto/backend # Caminho direto para os testes
+          cd ci_cd_projeto/backend 
           npm install
           npm run test:cov
 
@@ -118,7 +118,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Ou a versão que seu projeto usa
+          node-version: '18' 
       - name: Instalar dependências e Buildar Frontend
         shell: bash
         run: |
@@ -138,7 +138,7 @@ jobs:
   
   sonarqube:
     name: SonarQube Scan
-    needs: [teste_back, build_front] # Executa após testes do back e build do front
+    needs: [teste_back, build_front] 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -148,32 +148,32 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5 # Verifique a versão mais recente
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          # SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} # Descomente se usar SonarQube auto-hospedado
+          # SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} 
 
-  empacotar_e_release: # Nome do job ajustado para clareza
+  empacotar_e_release:
     name: Empacotar e Criar Release
-    needs: [GerarVersao, sonarqube] # Depende da geração de versão e da análise do SonarQube
+    needs: [GerarVersao, sonarqube] 
     runs-on: ubuntu-latest
     steps:
      - name: Download Artefato Frontend
        uses: actions/download-artifact@v4
        with:
-         name: frontend-artifact # Nome do artefato definido no upload
+         name: frontend-artifact 
          # path: local_path_to_download_to # Opcional, por padrão baixa para o workspace
      - name: Download Artefato Backend
        uses: actions/download-artifact@v4
        with:
-         name: backend-artifact # Nome do artefato definido no upload
+         name: backend-artifact 
      - name: Listar arquivos para verificar downloads
        run: ls -la
      - name: Criar Release no GitHub
-       uses: softprops/action-gh-release@v2 # Verifique a versão mais recente
+       uses: softprops/action-gh-release@v2
        env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        with:
          body: Release ${{ needs.GerarVersao.outputs.versao }}
          tag_name: ${{ needs.GerarVersao.outputs.versao }}
-         # Os arquivos ZIP já estarão no diretório raiz do runner após o download
+         
          files: |
            backend.zip
            frontend.zip
