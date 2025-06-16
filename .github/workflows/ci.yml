@@ -1,8 +1,7 @@
 name: CI - Snapshot
 run-name: CI snapshot disparada por ${{ github.actor }}
 
-on:   
-  # inicia o workflow manualmente
+on:
   workflow_dispatch:
     inputs:
       tipo_versao:
@@ -95,18 +94,21 @@ jobs:
       - name: Baixando o repositório
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          repository: ${{ github.repository }}
+          path: build
       - name: Executar os testes automatizados
         shell: bash
         run: |
-          cd ci_cd_projeto/backend
+          cd build/ci_cd_projeto/backend
           npm install
           npm run test:cov
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: build
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          
+
   build_front:
     name: Build Front
     needs: [GerarVersao]
@@ -133,10 +135,10 @@ jobs:
         with:
           name: frontend
           path: build/ci_cd_projeto/frontend/frontend.zip
-          
+
   empacotar:
     name: Empacotar
-    needs: [GerarVersao, teste_back]
+    needs: [teste_back, build_front, GerarVersao]
     runs-on: ubuntu-latest
     steps:
      - name: Download Zip Frontend
